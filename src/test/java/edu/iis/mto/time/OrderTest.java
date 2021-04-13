@@ -36,8 +36,17 @@ class OrderTest {
         when(clock.instant()).thenReturn(start).thenReturn(end);
         order.submit();
         assertThrows(OrderExpiredException.class, () -> order.confirm());
-        assertEquals(order.getOrderState(), Order.State.CANCELLED);
     }
 
+    @Test
+    void testOrderWithValidPeriodShouldBeConfirmed(){
+        int timeAfterHalfDay = 12;
+        Instant start = Instant.now();
+        Instant end = start.plus(timeAfterHalfDay, ChronoUnit.HOURS);
+        when(clock.instant()).thenReturn(start).thenReturn(end);
+        order.submit();
+        order.confirm();
+        assertEquals(order.getOrderState(), Order.State.CONFIRMED);
+    }
 
 }
