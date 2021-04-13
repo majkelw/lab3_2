@@ -49,4 +49,16 @@ class OrderTest {
         assertEquals(order.getOrderState(), Order.State.CONFIRMED);
     }
 
+    @Test
+    void testOrderWithValidPeriodShouldBeRealized(){
+        int timeAfterDay = 24;
+        Instant start = Instant.now();
+        Instant end = start.plus(timeAfterDay, ChronoUnit.HOURS);
+        when(clock.instant()).thenReturn(start).thenReturn(end);
+        order.submit();
+        order.confirm();
+        order.realize();
+        assertEquals(order.getOrderState(), Order.State.REALIZED);
+    }
+
 }
