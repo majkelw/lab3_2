@@ -23,13 +23,13 @@ class OrderTest {
     private Order order;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
         order = new Order(clock);
     }
 
     @Test
-    void testOrderConfirmWithInvalidPeriodShouldThrowOrderExpiredException(){
+    void testOrderConfirmWithInvalidPeriodShouldThrowOrderExpiredException() {
         int timeAfterTwoDays = 48;
         Instant start = Instant.now();
         Instant end = start.plus(timeAfterTwoDays, ChronoUnit.HOURS);
@@ -39,18 +39,18 @@ class OrderTest {
     }
 
     @Test
-    void testOrderWithValidPeriodShouldBeConfirmed(){
+    void testOrderWithValidPeriodShouldBeConfirmed() {
         int timeAfterHalfDay = 12;
         Instant start = Instant.now();
         Instant end = start.plus(timeAfterHalfDay, ChronoUnit.HOURS);
         when(clock.instant()).thenReturn(start).thenReturn(end);
         order.submit();
         order.confirm();
-        assertEquals(order.getOrderState(), Order.State.CONFIRMED);
+        assertEquals(Order.State.CONFIRMED, order.getOrderState());
     }
 
     @Test
-    void testOrderWithValidPeriodShouldBeRealized(){
+    void testOrderWithValidPeriodShouldBeRealized() {
         int timeAfterDay = 24;
         Instant start = Instant.now();
         Instant end = start.plus(timeAfterDay, ChronoUnit.HOURS);
@@ -58,18 +58,28 @@ class OrderTest {
         order.submit();
         order.confirm();
         order.realize();
-        assertEquals(order.getOrderState(), Order.State.REALIZED);
+        assertEquals(Order.State.REALIZED, order.getOrderState());
     }
 
     @Test
-    void testOrderConfirmWithInvalidPeriodShouldBeCancelled(){
+    void testOrderConfirmWithInvalidPeriodShouldBeCancelled() {
         int timeAfterFourDays = 96;
         Instant start = Instant.now();
         Instant end = start.plus(timeAfterFourDays, ChronoUnit.HOURS);
         when(clock.instant()).thenReturn(start).thenReturn(end);
         order.submit();
         assertThrows(OrderExpiredException.class, () -> order.confirm());
-        assertEquals(order.getOrderState(), Order.State.CANCELLED);
+        assertEquals(Order.State.CANCELLED, order.getOrderState());
+    }
+
+    @Test
+    void testOrderWithoutConfirmationShouldThrowOrderStateException() {
+        Instant start = Instant.now();
+        int timeAfterDay = 24;
+        Instant end = start.plus(timeAfterDay, ChronoUnit.HOURS);
+        when(clock.instant()).thenReturn(start).thenReturn(end);
+        order.submit();
+        assertThrows(OrderStateException.class, () -> order.realize());
     }
 
 }
