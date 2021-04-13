@@ -61,4 +61,15 @@ class OrderTest {
         assertEquals(order.getOrderState(), Order.State.REALIZED);
     }
 
+    @Test
+    void testOrderConfirmWithInvalidPeriodShouldBeCancelled(){
+        int timeAfterFourDays = 96;
+        Instant start = Instant.now();
+        Instant end = start.plus(timeAfterFourDays, ChronoUnit.HOURS);
+        when(clock.instant()).thenReturn(start).thenReturn(end);
+        order.submit();
+        assertThrows(OrderExpiredException.class, () -> order.confirm());
+        assertEquals(order.getOrderState(), Order.State.CANCELLED);
+    }
+
 }
